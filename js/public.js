@@ -30,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof AuthPopup !== 'undefined' && AuthPopup.renderAuthModal) {
         dynamicAuthContainer.innerHTML = AuthPopup.renderAuthModal();
       } else {
-        // Fallback darurat jika js/auth-popup.js terlambat dimuat
         dynamicAuthContainer.innerHTML = `
           <div class="auth-modal-overlay">
             <div class="auth-modal-card">
@@ -51,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Sinkronkan data terbaru user yang sedang login (skor, tingkatan, jabatan, absen)
+  // Sinkronkan data terbaru user yang sedang login
   async function refreshCurrentUserFromServer() {
     if (!currentUser || !currentUser.email) return;
     try {
@@ -145,6 +144,8 @@ document.addEventListener('DOMContentLoaded', () => {
           nik: nik,
           tempatLahir: document.getElementById('regTempatLahir').value.trim(),
           tglLahir: document.getElementById('regTglLahir').value,
+          kelas: document.getElementById('regKelas').value,
+          subKelas: document.getElementById('regSubKelas').value,
           sekolah: document.getElementById('regSekolah').value,
           tingkatan: document.getElementById('regTingkatan').value,
           namaOrtu: document.getElementById('regNamaOrtu').value.trim(),
@@ -273,7 +274,10 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) { console.error('Error loadPublicData:', err); }
   }
 
-  // 5. Muat Daftar Anggota Aktif
+  // 5. Muat Daftar Anggota Aktif (Dengan Filter Angkatan Terdaftar)
+  let cachedActiveMembers = [];
+  let selectedPublicAngkatan = 'ALL';
+
   async function loadActiveMembers() {
     const grid = document.getElementById('membersGridContainer');
     if (!grid) return;
@@ -282,24 +286,72 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const res = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getAllMembers&t=${Date.now()}`);
       const members = await res.json();
-      const activeMembers = members.filter(m => String(m.status).trim().toUpperCase() === 'APPROVED');
+      cachedActiveMembers = members.filter(m => String(m.status).trim().toUpperCase() === 'APPROVED');
 
-      if (!activeMembers.length) {
-        grid.innerHTML = '<p class="text-center">Belum ada anggota aktif.</p>';
-        return;
-      }
+      renderPublicAngkatanFilter();
+      renderMembersGrid();
+    } catch (err) {
+      grid.innerHTML = '<p class="text-center" style="color:red;">Gagal memuat anggota.</p>';
+    }
+  }
 
-      grid.innerHTML = activeMembers.map(m => `
+  function renderPublicAngkatanFilter() {
+    const filterContainer = document.getElementById('publicAngkatanFilterContainer');
+    if (!filterContainer) return;
+
+    const batches = [...new Set(cachedActiveMembers.map(m => String(m.angkatan || '').trim()).filter(Boolean))].sort();
+    if (!batches.length) {
+      filterContainer.innerHTML = '';
+      return;
+    }
+
+    filterContainer.innerHTML = `
+      <button type="button" class="tab-btn ${selectedPublicAngkatan === 'ALL' ? 'active' : ''}" onclick="filterPublicMembersByAngkatan('ALL')" style="padding:6px 14px; font-size:12px;">
+        Semua Angkatan (${cachedActiveMembers.length})
+      </button>
+      ${batches.map(b => {
+        const count = cachedActiveMembers.filter(m => String(m.angkatan || '').trim() === b).length;
+        return `
+          <button type="button" class="tab-btn ${selectedPublicAngkatan === b ? 'active' : ''}" onclick="filterPublicMembersByAngkatan('${b}')" style="padding:6px 14px; font-size:12px;">
+            Angkatan ${b} (${count})
+          </button>
+        `;
+      }).join('')}
+    `;
+  }
+
+  window.filterPublicMembersByAngkatan = function(angkatan) {
+    selectedPublicAngkatan = angkatan;
+    renderPublicAngkatanFilter();
+    renderMembersGrid();
+  };
+
+  function renderMembersGrid() {
+    const grid = document.getElementById('membersGridContainer');
+    if (!grid) return;
+
+    const list = selectedPublicAngkatan === 'ALL'
+      ? cachedActiveMembers
+      : cachedActiveMembers.filter(m => String(m.angkatan || '').trim() === selectedPublicAngkatan);
+
+    if (!list.length) {
+      grid.innerHTML = '<p class="text-center">Belum ada anggota aktif.</p>';
+      return;
+    }
+
+    grid.innerHTML = list.map(m => {
+      const kelasStr = m.kelas ? `Kelas ${m.kelas}${m.subKelas || ''}` : '';
+      const angkatanStr = m.angkatan ? `Angkatan ${m.angkatan}` : '';
+      return `
         <div class="member-card">
           <img src="${m.foto || 'https://via.placeholder.com/70'}" alt="${m.nama}" class="member-avatar zoomable" onclick="openZoomImage(this.src)">
           <h4>${m.nama}</h4>
           <p>${m.jabatan || 'Anggota'} • ${m.tingkatan || 'Mula'}</p>
+          ${kelasStr ? `<p style="font-size:12px; font-weight:700; color:#3730a3; margin:2px 0;">${kelasStr}${angkatanStr ? ` • ${angkatanStr}` : ''}</p>` : ''}
           <span style="font-size: 11px; color: #16a34a; font-weight: 700;">${m.sekolah}</span>
         </div>
-      `).join('');
-    } catch (err) {
-      grid.innerHTML = '<p class="text-center" style="color:red;">Gagal memuat anggota.</p>';
-    }
+      `;
+    }).join('');
   }
 
   // 6. Muat Leaderboard
@@ -482,8 +534,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('navUserAvatar').src = photo;
     document.getElementById('cardAvatar').src = photo;
 
+    const kelasFull = currentUser.kelas ? `Kelas ${currentUser.kelas}${currentUser.subKelas || ''}` : '-';
     document.getElementById('userCodeBadge').innerText = `Kode PMR: PMR-${currentUser.id}`;
-    document.getElementById('userBadgeTingkatan').innerText = `Tingkatan: ${currentUser.tingkatan || 'Mula'}`;
+    document.getElementById('userBadgeTingkatan').innerText = `Tingkatan: ${currentUser.tingkatan || 'Mula'} • ${kelasFull}`;
     document.getElementById('userJabatanDisplay').innerText = currentUser.jabatan || 'Anggota';
 
     const hadir = parseInt(currentUser.hadir) || 0;
@@ -492,7 +545,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('cardNama').innerText = currentUser.nama;
     document.getElementById('cardKode').innerText = `PMR-${currentUser.id}`;
-    document.getElementById('cardJabatan').innerText = currentUser.jabatan || 'Anggota';
+    document.getElementById('cardJabatan').innerText = `${currentUser.jabatan || 'Anggota'} (${kelasFull})`;
     document.getElementById('cardTingkatBadge').innerText = (currentUser.tingkatan || 'MULA').toUpperCase();
     document.getElementById('cardSekolah').innerText = currentUser.sekolah;
 
@@ -503,6 +556,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('userInfoDisplay').innerHTML = `
       <p><strong>NIK:</strong> ${currentUser.nik}</p>
       <p><strong>Email:</strong> ${currentUser.email}</p>
+      <p><strong>Kelas:</strong> ${kelasFull}</p>
+      <p><strong>Angkatan:</strong> ${currentUser.angkatan || '-'}</p>
       <p><strong>Sekolah:</strong> ${currentUser.sekolah}</p>
       <p><strong>Nama Orang Tua:</strong> ${currentUser.namaOrtu || '-'}</p>
       <p><strong>No HP Ortu:</strong> ${currentUser.noOrtu || '-'}</p>

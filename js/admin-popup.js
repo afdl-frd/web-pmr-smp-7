@@ -8,9 +8,10 @@ const AdminPopup = {
   selectedStatus: 'APPROVED',
   selectedJabatan: 'Anggota',
   selectedTingkatan: 'Mula',
+  selectedKelas: '7',
+  selectedSubKelas: 'A',
   onSaveCallback: null,
 
-  // Inisialisasi kerangka popup ke dalam body sekali saja
   init() {
     if (document.getElementById('adminCustomPopupOverlay')) return;
     const wrapper = document.createElement('div');
@@ -25,7 +26,6 @@ const AdminPopup = {
     if (overlay) overlay.classList.add('hidden');
   },
 
-  // 1. Popup Notifikasi / Konfirmasi Ringan (Pengganti alert & confirm)
   showConfirm({ title, message, isConfirm = false, onConfirm = null }) {
     this.init();
     const box = document.getElementById('adminCustomPopupBox');
@@ -50,17 +50,20 @@ const AdminPopup = {
     }
   },
 
-  // 2. Popup Pilihan & Edit Lengkap Anggota (Selaras Tema Web, Tanpa <select> Berat)
   openMemberEditor(member, onSave) {
     this.init();
     this.currentMember = member;
     this.selectedStatus = String(member.status || 'PENDING').toUpperCase();
     this.selectedJabatan = member.jabatan || 'Anggota';
     this.selectedTingkatan = member.tingkatan || 'Mula';
+    this.selectedKelas = String(member.kelas || '7');
+    this.selectedSubKelas = String(member.subKelas || 'A').toUpperCase();
     this.onSaveCallback = onSave;
 
     const jabatanOptions = ['Anggota', 'Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Koordinator'];
     const tingkatanOptions = ['Mula', 'Madya', 'Wira'];
+    const kelasOptions = ['7', '8', '9', '10', '11', '12'];
+    const subKelasOptions = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'];
     const statusOptions = [
       { val: 'APPROVED', label: '✅ Diterima (Approved)' },
       { val: 'PENDING', label: '⏳ Pending' },
@@ -87,6 +90,33 @@ const AdminPopup = {
                 onclick="AdminPopup.selectOption('status', '${st.val}', this)">${st.label}</button>
             `).join('')}
           </div>
+        </div>
+
+        <!-- PILIHAN KELAS & SUB KELAS -->
+        <div class="popup-section">
+          <label>Kelas (7 - 12)</label>
+          <div class="pill-group" id="pillKelasGroup">
+            ${kelasOptions.map(kl => `
+              <button type="button" class="pill-btn ${this.selectedKelas === kl ? 'active' : ''}" 
+                onclick="AdminPopup.selectOption('kelas', '${kl}', this)">${kl}</button>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="popup-section">
+          <label>Sub Kelas (A - K)</label>
+          <div class="pill-group" id="pillSubKelasGroup">
+            ${subKelasOptions.map(sk => `
+              <button type="button" class="pill-btn ${this.selectedSubKelas === sk ? 'active' : ''}" 
+                onclick="AdminPopup.selectOption('subKelas', '${sk}', this)">${sk}</button>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- ANGKATAN -->
+        <div class="popup-section">
+          <label>Angkatan</label>
+          <input type="text" id="popAngkatan" value="${member.angkatan || ''}" placeholder="Contoh: 2026" style="width:100%; padding:8px 12px; border:1.5px solid #d1d5db; border-radius:8px;">
         </div>
 
         <!-- PILIHAN TINGKATAN PMR -->
@@ -148,6 +178,8 @@ const AdminPopup = {
     if (type === 'status') this.selectedStatus = value;
     if (type === 'tingkatan') this.selectedTingkatan = value;
     if (type === 'jabatan') this.selectedJabatan = value;
+    if (type === 'kelas') this.selectedKelas = value;
+    if (type === 'subKelas') this.selectedSubKelas = value;
 
     const parent = btnElement.parentElement;
     parent.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
@@ -164,6 +196,9 @@ const AdminPopup = {
       status: this.selectedStatus,
       jabatan: this.selectedJabatan,
       tingkatan: this.selectedTingkatan,
+      kelas: this.selectedKelas,
+      subKelas: this.selectedSubKelas,
+      angkatan: document.getElementById('popAngkatan').value.trim(),
       hadir: parseInt(document.getElementById('popHadir').value) || 0,
       izin: parseInt(document.getElementById('popIzin').value) || 0,
       alpha: parseInt(document.getElementById('popAlpha').value) || 0,

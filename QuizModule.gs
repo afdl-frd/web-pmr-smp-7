@@ -1,19 +1,36 @@
 /**
- * SIAMO PMR - QuizModule.gs (Sinkronisasi Room & Selesaikan Room)
+ * SIAMO PMR - QuizModule.gs (Versi Indeks Kolom Absolut - Anti Gagal Baca Sheet)
  */
 
 function getQuizListApi(ss) {
   const sheet = getOrCreateSheet(ss, "Quizzes");
   const rows = sheet.getDataRange().getValues();
   if (rows.length <= 1) return [];
-  const headers = rows[0];
+  
   let data = [];
+  // Kolom Spreadsheet Quizzes:
+  // [0] id, [1] title, [2] category, [3] duration, [4] maxScore, [5] shuffle, [6] displayMode, [7] showAnswer, [8] status
   for (let i = 1; i < rows.length; i++) {
-    let obj = {};
-    for (let j = 0; j < headers.length; j++) obj[headers[j]] = rows[i][j];
-    // Hanya tampilkan room yang belum berstatus FINISHED
-    if (String(obj.status || "").toUpperCase() !== "FINISHED") {
-      data.push(obj);
+    let row = rows[i];
+    if (!row[0]) continue; // Lewati jika ID kosong
+    
+    let quizId = String(row[0]).trim();
+    let title = String(row[1] || "Tanpa Judul");
+    let category = String(row[2] || "").trim().toLowerCase();
+    let duration = Number(row[3] || 30);
+    let maxScore = Number(row[4] || 100);
+    let status = String(row[8] || "WAITING").trim().toUpperCase();
+    
+    // Masukkan jika bukan FINISHED
+    if (status !== "FINISHED") {
+      data.push({
+        id: quizId,
+        title: title,
+        category: category,
+        duration: duration,
+        maxScore: maxScore,
+        status: status
+      });
     }
   }
   return data;
@@ -24,13 +41,22 @@ function getQuizDetailApi(ss, quizId) {
   const rows = quesSheet.getDataRange().getValues();
   if (rows.length <= 1) return { questions: [] };
 
-  const headers = rows[0];
   let questions = [];
+  // Kolom QuizQuestions:
+  // [0] id, [1] quizId, [2] questionText, [3] image, [4] optA, [5] optB, [6] optC, [7] optD, [8] correctKey, [9] type
   for (let i = 1; i < rows.length; i++) {
-    if (String(rows[i][headers.indexOf("quizId")]) === String(quizId)) {
-      let obj = {};
-      for (let j = 0; j < headers.length; j++) obj[headers[j]] = rows[i][j];
-      questions.push(obj);
+    let row = rows[i];
+    if (String(row[1]).trim() === String(quizId).trim()) {
+      questions.push({
+        id: String(row[0] || Math.random()),
+        questionText: String(row[2] || ""),
+        image: String(row[3] || ""),
+        optA: String(row[4] || ""),
+        optB: String(row[5] || ""),
+        optC: String(row[6] || ""),
+        optD: String(row[7] || ""),
+        correctKey: String(row[8] || "A")
+      });
     }
   }
   return { questions };
@@ -41,17 +67,21 @@ function createQuizApi(ss, data) {
   if (qSheet.getLastRow() === 0) {
     qSheet.appendRow(["id", "title", "category", "duration", "maxScore", "shuffle", "displayMode", "showAnswer", "status"]);
   }
+  
   const quizId = Date.now();
+  const category = String(data.category || "sukasuka").trim().toLowerCase();
+  const initialStatus = category === "sukasuka" ? "WAITING" : "ACTIVE";
+  
   qSheet.appendRow([
-    quizId, 
+    String(quizId), 
     data.title, 
-    data.category, 
+    category, 
     data.duration || 30, 
     data.maxScore || 100, 
     "FALSE", 
     "scroll", 
     "TRUE",
-    data.category === "sukasuka" ? "WAITING" : "ACTIVE"
+    initialStatus
   ]);
 
   if (data.questions && data.questions.length > 0) {
@@ -61,21 +91,21 @@ function createQuizApi(ss, data) {
     }
     data.questions.forEach(q => {
       quesSheet.appendRow([
-        Date.now() + Math.random(), 
-        quizId, 
+        String(Date.now() + Math.random()), 
+        String(quizId), 
         q.text || "", 
         q.image || "", 
         q.optA || "", 
         q.optB || "", 
         q.optC || "", 
         q.optD || "", 
-        q.correct || "", 
+        q.correct || "A", 
         "mc"
       ]);
     });
   }
   SpreadsheetApp.flush();
-  return { status: "success", message: "Kuis berhasil dibuat!", quizId: quizId };
+  return { status: "success", message: "Room berhasil dibuat!", quizId: quizId };
 }
 
 function joinQuizRoomApi(ss, data) {
@@ -85,15 +115,15 @@ function joinQuizRoomApi(ss, data) {
   }
   
   const rows = sheet.getDataRange().getValues();
-  const headers = rows[0];
+  // Kolom QuizParticipants: [0] id, [1] quizId, [2] memberEmail, [3] memberName, [4] status
   for (let i = 1; i < rows.length; i++) {
-    if (String(rows[i][headers.indexOf("quizId")]) === String(data.quizId) &&
-        String(rows[i][headers.indexOf("memberEmail")]).toLowerCase() === String(data.email).toLowerCase()) {
+    if (String(rows[i][1]).trim() === String(data.quizId).trim() &&
+        String(rows[i][2]).trim().toLowerCase() === String(data.email).trim().toLowerCase()) {
       return { status: "success" };
     }
   }
 
-  sheet.appendRow([Date.now(), data.quizId, data.email, data.name, "JOINED"]);
+  sheet.appendRow([String(Date.now()), String(data.quizId), data.email, data.name, "JOINED"]);
   SpreadsheetApp.flush();
   return { status: "success" };
 }
@@ -101,26 +131,24 @@ function joinQuizRoomApi(ss, data) {
 function getRoomStatusApi(ss, quizId) {
   const qSheet = getOrCreateSheet(ss, "Quizzes");
   const rows = qSheet.getDataRange().getValues();
-  const headers = rows[0];
-  let quizStatus = "ACTIVE";
+  let quizStatus = "WAITING";
+  
   for (let i = 1; i < rows.length; i++) {
-    if (String(rows[i][headers.indexOf("id")]) === String(quizId)) {
-      quizStatus = rows[i][headers.indexOf("status")] || "ACTIVE";
+    if (String(rows[i][0]).trim() === String(quizId).trim()) {
+      quizStatus = String(rows[i][8] || "WAITING").trim().toUpperCase();
       break;
     }
   }
 
   const pSheet = getOrCreateSheet(ss, "QuizParticipants");
   const pRows = pSheet.getDataRange().getValues();
-  if (pRows.length <= 1) return { status: quizStatus, participants: [] };
-  
-  const pHeaders = pRows[0];
   let participants = [];
+  
   for (let i = 1; i < pRows.length; i++) {
-    if (String(pRows[i][pHeaders.indexOf("quizId")]) === String(quizId)) {
+    if (String(pRows[i][1]).trim() === String(quizId).trim()) {
       participants.push({
-        email: pRows[i][pHeaders.indexOf("memberEmail")],
-        name: pRows[i][pHeaders.indexOf("memberName")]
+        email: String(pRows[i][2] || ""),
+        name: String(pRows[i][3] || "Siswa")
       });
     }
   }
@@ -131,10 +159,10 @@ function getRoomStatusApi(ss, quizId) {
 function startQuizRoomApi(ss, quizId) {
   const qSheet = getOrCreateSheet(ss, "Quizzes");
   const rows = qSheet.getDataRange().getValues();
-  const headers = rows[0];
+  
   for (let i = 2; i <= rows.length; i++) {
-    if (String(qSheet.getRange(i, headers.indexOf("id") + 1).getValue()) === String(quizId)) {
-      qSheet.getRange(i, headers.indexOf("status") + 1).setValue("STARTED");
+    if (String(qSheet.getRange(i, 1).getValue()).trim() === String(quizId).trim()) {
+      qSheet.getRange(i, 9).setValue("STARTED"); // Kolom 9 adalah status
       break;
     }
   }
@@ -145,10 +173,10 @@ function startQuizRoomApi(ss, quizId) {
 function finishQuizRoomApi(ss, quizId) {
   const qSheet = getOrCreateSheet(ss, "Quizzes");
   const rows = qSheet.getDataRange().getValues();
-  const headers = rows[0];
+  
   for (let i = 2; i <= rows.length; i++) {
-    if (String(qSheet.getRange(i, headers.indexOf("id") + 1).getValue()) === String(quizId)) {
-      qSheet.getRange(i, headers.indexOf("status") + 1).setValue("FINISHED");
+    if (String(qSheet.getRange(i, 1).getValue()).trim() === String(quizId).trim()) {
+      qSheet.getRange(i, 9).setValue("FINISHED"); // Kolom 9 adalah status
       break;
     }
   }
@@ -159,34 +187,21 @@ function finishQuizRoomApi(ss, quizId) {
 function submitQuizResultApi(ss, data) {
   const sheet = getOrCreateSheet(ss, "QuizSubmissions");
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(["id", "quizId", "memberEmail", "memberName", "score", "timestamp", "category"]);
+    sheet.appendRow(["id", "quizId", "memberEmail", "memberName", "score", "correctCount", "wrongCount", "timestamp", "category"]);
   }
+  
   sheet.appendRow([
-    Date.now(), 
-    data.quizId, 
+    String(Date.now()), 
+    String(data.quizId), 
     data.email, 
     data.name, 
-    data.score, 
+    Number(data.score || 0), 
+    Number(data.correctCount || 0),
+    Number(data.wrongCount || 0),
     new Date().toLocaleString(), 
-    data.category
+    String(data.category || "sukasuka")
   ]);
   
-  if (data.category !== "sukasuka" && data.email) {
-    const mSheet = getOrCreateSheet(ss, "Members");
-    const mRows = mSheet.getDataRange().getValues();
-    const mHeaders = mRows[0];
-    const emailIdx = mHeaders.indexOf("email") + 1;
-    const skorKuisIdx = mHeaders.indexOf("skorKuis") + 1;
-
-    for (let i = 2; i <= mRows.length; i++) {
-      if (String(mSheet.getRange(i, emailIdx).getValue()).trim().toLowerCase() === String(data.email).trim().toLowerCase()) {
-        let currentSkor = parseInt(mSheet.getRange(i, skorKuisIdx).getValue()) || 0;
-        mSheet.getRange(i, skorKuisIdx).setValue(currentSkor + parseInt(data.score));
-        break;
-      }
-    }
-  }
-
   SpreadsheetApp.flush();
   return { status: "success", score: data.score };
 }
@@ -196,13 +211,19 @@ function getQuizSubmissionsApi(ss, quizId) {
   const rows = sheet.getDataRange().getValues();
   if (rows.length <= 1) return [];
   
-  const headers = rows[0];
   let list = [];
+  // Kolom QuizSubmissions: [0] id, [1] quizId, [2] memberEmail, [3] memberName, [4] score, [5] correctCount, [6] wrongCount, [7] timestamp, [8] category
   for (let i = 1; i < rows.length; i++) {
-    if (String(rows[i][headers.indexOf("quizId")]) === String(quizId)) {
-      let obj = {};
-      for (let j = 0; j < headers.length; j++) obj[headers[j]] = rows[i][j];
-      list.push(obj);
+    let row = rows[i];
+    if (String(row[1]).trim() === String(quizId).trim()) {
+      list.push({
+        memberName: String(row[3] || "Siswa"),
+        memberEmail: String(row[2] || ""),
+        score: Number(row[4] || 0),
+        correctCount: Number(row[5] || 0),
+        wrongCount: Number(row[6] || 0),
+        timestamp: String(row[7] || "")
+      });
     }
   }
   return list;

@@ -43,28 +43,40 @@
         </div>
       </section>
 
-      <!-- 2. KELOLA ANGGOTA (TABEL RINGAN TANPA SELECT MENUMPUK) -->
+      <!-- 2. KELOLA ANGGOTA -->
       <section id="panelMembers" class="admin-panel hidden">
         <div class="card-admin">
           <h3>👥 Manajemen & Verifikasi Anggota</h3>
-          <p class="subtitle-admin" style="margin-bottom: 16px;">Klik tombol <strong>Atur / Edit</strong> pada baris anggota untuk mengubah status, jabatan, tingkatan, absensi, dan skor.</p>
+          <p class="subtitle-admin" style="margin-bottom: 16px;">Klik tombol <strong>Atur / Edit</strong> pada baris anggota untuk mengubah status, kelas, angkatan, jabatan, tingkatan, absensi, dan skor.</p>
 
           <div class="search-wrapper" style="position: relative; margin-bottom: 20px;">
-            <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">🔍 Cari Nama Anak, NIK, atau Asal Sekolah</label>
-            <div style="display: flex; gap: 8px;">
-              <input type="text" id="memberSearchInput" placeholder="Ketik Nama, 16 Digit NIK, atau Nama Sekolah..." autocomplete="off" oninput="handleSearchInput()" onfocus="handleSearchInput()" style="flex: 1; padding: 12px 16px; border: 1.5px solid #d1d5db; border-radius: 12px; font-size: 14px;">
+            <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">🔍 Cari Nama Anak, NIK, Kelas, Angkatan, atau Asal Sekolah</label>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <input type="text" id="memberSearchInput" placeholder="Ketik Nama, 16 Digit NIK, Kelas (misal: 7A), atau Sekolah..." autocomplete="off" oninput="handleSearchInput()" onfocus="handleSearchInput()" style="flex: 1; min-width: 220px; padding: 12px 16px; border: 1.5px solid #d1d5db; border-radius: 12px; font-size: 14px;">
+              <select id="adminFilterKelasSelect" onchange="selectKelasFilter(this.value)" style="padding: 12px 14px; border: 1.5px solid #d1d5db; border-radius: 12px; font-size: 14px; font-weight: 600;">
+                <option value="ALL">Semua Kelas (7-12)</option>
+                <option value="7">Kelas 7</option>
+                <option value="8">Kelas 8</option>
+                <option value="9">Kelas 9</option>
+                <option value="10">Kelas 10</option>
+                <option value="11">Kelas 11</option>
+                <option value="12">Kelas 12</option>
+              </select>
               <button type="button" onclick="resetSearchFilter()" class="btn-secondary-admin">Reset</button>
             </div>
             <div id="schoolSuggestionsBox" class="suggestions-dropdown hidden"></div>
           </div>
 
-          <div style="margin-bottom: 10px; font-size: 12px; font-weight: 700; color: #6b7280; text-transform: uppercase;">🏫 Filter Sekolah Terdaftar:</div>
+          <div style="margin-bottom: 8px; font-size: 12px; font-weight: 700; color: #6b7280; text-transform: uppercase;">🎓 Lihat Berdasarkan Angkatan Terdaftar:</div>
+          <div class="school-tab-container" id="angkatanTabsContainer" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px;"></div>
+
+          <div style="margin-bottom: 8px; font-size: 12px; font-weight: 700; color: #6b7280; text-transform: uppercase;">🏫 Filter Sekolah Terdaftar:</div>
           <div class="school-tab-container" id="schoolTabsContainer" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;"></div>
 
           <h4 style="color:#b45309; margin-top:25px; margin-bottom: 10px;">⏳ Belum Diterima (Pending)</h4>
           <div class="table-responsive">
             <table class="admin-table">
-              <thead><tr><th>Foto</th><th>Nama / NIK / Ortu</th><th>Sekolah & Tingkat</th><th>Tindakan</th></tr></thead>
+              <thead><tr><th>Foto</th><th>Nama / NIK / Ortu</th><th>Kelas & Angkatan</th><th>Sekolah & Tingkat</th><th>Tindakan</th></tr></thead>
               <tbody id="pendingMembersTableBody"></tbody>
             </table>
           </div>
@@ -72,7 +84,7 @@
           <h4 style="color:#15803d; margin-top:30px; margin-bottom: 10px;">✅ Sudah Diterima (Approved)</h4>
           <div class="table-responsive">
             <table class="admin-table">
-              <thead><tr><th>Foto</th><th>Nama & NIK</th><th>Jabatan & Tingkat</th><th>Absen & Poin</th><th>Aksi</th></tr></thead>
+              <thead><tr><th>Foto</th><th>Nama & NIK</th><th>Kelas & Angkatan</th><th>Jabatan & Tingkat</th><th>Absen & Poin</th><th>Aksi</th></tr></thead>
               <tbody id="approvedMembersTableBody"></tbody>
             </table>
           </div>

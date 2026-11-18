@@ -89,7 +89,13 @@ function doPost(e) {
     } else if (action === "joinQuizRoom") {
       result = joinQuizRoomApi(ss, data);
     } else if (action === "startQuizRoom") {
-      result = startQuizRoomApi(ss, data);
+      result = startQuizRoomApi(ss, data.quizId || data.id);
+    } else if (action === "finishQuizRoom") {
+      result = finishQuizRoomApi(ss, data.quizId || data.id);
+    } else if (action === "deleteQuizRoom") {
+      result = deleteQuizRoomApi(ss, data.quizId || data.id);
+    } else if (action === "checkStudentExamAccess") {
+      result = checkStudentExamAccessApi(ss, data);
     } else if (action === "submitQuizResult") {
       result = submitQuizResultApi(ss, data);
     } else {
@@ -103,7 +109,7 @@ function doPost(e) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-// --- HELPER FUNCTIONS UNTUK MEMBER & WEB UTAMA ---
+// --- HELPER FUNCTIONS ---
 function getOrCreateSheet(ss, sheetName) {
   let sheet = ss.getSheetByName(sheetName);
   if (!sheet) sheet = ss.insertSheet(sheetName);

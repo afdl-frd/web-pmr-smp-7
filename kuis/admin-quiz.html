@@ -10,7 +10,6 @@
 </head>
 <body class="rh-body">
   <div class="admin-wrapper">
-    <!-- SIDEBAR NAVIGASI -->
     <aside class="sidebar rh-sidebar">
       <div class="sidebar-brand"><span>QUIZ MASTER</span></div>
       <ul class="sidebar-menu">
@@ -20,11 +19,10 @@
         <li class="menu-item" data-target="panelRekap"><span>📊 Rekap Nilai</span></li>
       </ul>
       <div class="sidebar-footer">
-        <a href="../admin.html" class="btn-logout-admin rh-btn-back">← Admin Utama</a>
+        <a href="../index.html" class="btn-logout-admin rh-btn-back">← Beranda Utama</a>
       </div>
     </aside>
 
-    <!-- KONTEN UTAMA -->
     <main class="admin-main">
       <header class="admin-header"><h2 id="pageHeaderTitle">Panel Admin: Main Suka-Suka</h2></header>
 
@@ -49,7 +47,12 @@
           </div>
 
           <div class="right-action">
-            <button type="button" onclick="QuizNavMaster.publish('sukasuka')" class="btn-publish-quiz" style="background: #5c3d99;">🚀 Publikasikan Suka-Suka</button>
+            <button type="button" onclick="QuizNavMaster.publish('sukasuka')" class="btn-publish-quiz" style="background: #5c3d99;">🚀 Publikasikan Room</button>
+          </div>
+
+          <div style="margin-top: 35px; border-top: 3px solid #1a1a1a; padding-top: 20px;">
+            <h3 style="margin-bottom: 12px; font-weight:800;">🎮 Ruang Tunggu (Lobby) & Kontrol Admin</h3>
+            <div id="adminSukaRoomsList"><p class="text-center">Memuat room aktif...</p></div>
           </div>
         </div>
       </section>
@@ -59,12 +62,20 @@
         <div class="forms-builder-container">
           <div class="forms-header-card" style="border-top-color: #f4d03f;">
             <div class="input-group" style="margin-bottom: 12px;">
-              <label style="font-weight: 800; color: #1a1a1a;">Judul Tugas Harian (Masuk Rapor)</label>
+              <label style="font-weight: 800; color: #1a1a1a;">Judul Tugas Harian (Format Lembar & Anti-Keluar Room)</label>
               <input type="text" id="titleHarian" placeholder="Contoh: Tugas Harian 1 - Sejarah PMR">
             </div>
-            <div class="input-group">
-              <label>Durasi per Soal (Detik)</label>
-              <input type="number" id="durationHarian" value="45">
+            <div class="input-grid-2">
+              <div class="input-group">
+                <label>Durasi Pengerjaan (Menit)</label>
+                <input type="number" id="durationHarian" value="30">
+              </div>
+              <div class="input-group" style="display:flex; flex-direction:column; justify-content:flex-end;">
+                <label style="cursor:pointer; display:flex; align-items:center; gap:8px; font-weight:800; padding-bottom:8px;">
+                  <input type="checkbox" id="checkUseTimerHarian" checked onchange="QuizNavMaster.toggleDuration('Harian', this.checked)" style="width:18px; height:18px;">
+                  Gunakan Batas Waktu (Centang untuk pakai durasi)
+                </label>
+              </div>
             </div>
           </div>
 
@@ -85,12 +96,20 @@
         <div class="forms-builder-container">
           <div class="forms-header-card" style="border-top-color: #d9381e;">
             <div class="input-group" style="margin-bottom: 12px;">
-              <label style="font-weight: 800; color: #d9381e;">Judul Ujian Resmi (Masuk Rapor)</label>
+              <label style="font-weight: 800; color: #d9381e;">Judul Ujian Resmi (Format Lembar & Anti-Keluar Room)</label>
               <input type="text" id="titleUjian" placeholder="Contoh: Ujian Akhir Pertolongan Pertama">
             </div>
-            <div class="input-group">
-              <label>Durasi per Soal (Detik)</label>
-              <input type="number" id="durationUjian" value="60">
+            <div class="input-grid-2">
+              <div class="input-group">
+                <label>Durasi Pengerjaan (Menit)</label>
+                <input type="number" id="durationUjian" value="60">
+              </div>
+              <div class="input-group" style="display:flex; flex-direction:column; justify-content:flex-end;">
+                <label style="cursor:pointer; display:flex; align-items:center; gap:8px; font-weight:800; padding-bottom:8px;">
+                  <input type="checkbox" id="checkUseTimerUjian" checked onchange="QuizNavMaster.toggleDuration('Ujian', this.checked)" style="width:18px; height:18px;">
+                  Gunakan Batas Waktu (Centang untuk pakai durasi)
+                </label>
+              </div>
             </div>
           </div>
 
@@ -110,8 +129,8 @@
       <section id="panelRekap" class="admin-panel hidden">
         <div class="forms-builder-container">
           <div class="forms-header-card">
-            <h3 style="margin-bottom: 6px;">📊 Rekap Nilai & Peserta Kuis</h3>
-            <p style="font-size: 13px; color: #4b5563; margin-bottom: 20px;">Pilih kuis atau ujian untuk melihat daftar nilai siswa.</p>
+            <h3 style="margin-bottom: 6px;">📊 Rekap Nilai & Kelola Kuis</h3>
+            <p style="font-size: 13px; color: #4b5563; margin-bottom: 20px;">Lihat detail jawaban siswa atau hapus room/kuis yang sudah selesai.</p>
             <div id="containerQuizRecap"><p class="text-center">Memuat daftar...</p></div>
           </div>
         </div>
@@ -133,7 +152,7 @@
     </div>
   </div>
 
-  <!-- MODAL NOTIFIKASI RINGAN -->
+  <!-- MODAL NOTIFIKASI -->
   <div id="customAdminModal" class="rh-modal-overlay hidden">
     <div class="rh-modal-card" style="max-width: 380px; text-align: center;">
       <h3 id="modalTitle" style="margin-bottom: 8px; font-size: 18px; font-weight: 800;">Informasi</h3>

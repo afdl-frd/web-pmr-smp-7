@@ -4,6 +4,13 @@
 
 const AuthPopup = {
   renderAuthModal() {
+    const kelasOptions = [7, 8, 9, 10, 11, 12]
+      .map(k => `<option value="${k}">Kelas ${k}</option>`)
+      .join('');
+    const subKelasOptions = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']
+      .map(s => `<option value="${s}">${s}</option>`)
+      .join('');
+
     return `
       <div id="customAuthModal" class="auth-modal-overlay">
         <div class="auth-modal-card">
@@ -67,6 +74,16 @@ const AuthPopup = {
             </div>
             <div class="input-row">
               <div class="input-group">
+                <label>Kelas</label>
+                <select id="regKelas" required>${kelasOptions}</select>
+              </div>
+              <div class="input-group">
+                <label>Sub Kelas</label>
+                <select id="regSubKelas" required>${subKelasOptions}</select>
+              </div>
+            </div>
+            <div class="input-row">
+              <div class="input-group">
                 <label>Asal Sekolah</label>
                 <select id="regSekolah" required>
                   <option value="SMPN 7 Pontianak">SMPN 7 Pontianak</option>
@@ -76,7 +93,7 @@ const AuthPopup = {
                 <label>Tingkatan PMR</label>
                 <select id="regTingkatan" required>
                   <option value="Mula">Mula (SD)</option>
-                  <option value="Madya">Madya (SMP)</option>
+                  <option value="Madya" selected>Madya (SMP)</option>
                   <option value="Wira">Wira (SMA/K)</option>
                 </select>
               </div>
@@ -94,7 +111,7 @@ const AuthPopup = {
             <div class="input-row">
               <div class="input-group">
                 <label>Angkatan</label>
-                <input type="text" id="regAngkatan" placeholder="Contoh: 2025" required>
+                <input type="text" id="regAngkatan" placeholder="Contoh: 2026" required>
               </div>
               <div class="input-group">
                 <label>Foto Profil</label>

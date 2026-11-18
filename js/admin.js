@@ -13,12 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let allMembersData = [];
   let selectedSchool = 'ALL';
+  let selectedAngkatan = 'ALL';
+  let selectedKelas = 'ALL';
 
   async function fetchAdminData() {
     try {
       const res = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getAllMembers&t=${Date.now()}`);
       allMembersData = await res.json();
-      renderSchoolTabs();
+      renderFilterTabs();
       loadAdminActivities();
       loadAdminBooks();
       loadCurrentHomeConfig();
@@ -44,13 +46,49 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {}
   }
 
+  function renderFilterTabs() {
+    renderAngkatanTabs();
+    renderSchoolTabs();
+    renderMemberTables();
+  }
+
+  function renderAngkatanTabs() {
+    const container = document.getElementById('angkatanTabsContainer');
+    if (!container) return;
+
+    if (!allMembersData.length) {
+      container.innerHTML = '<p style="font-size:13px; color:#6b7280;">Belum ada data angkatan.</p>';
+      return;
+    }
+
+    const angkatans = [...new Set(
+      allMembersData.map(u => String(u.angkatan || '').trim()).filter(Boolean)
+    )].sort();
+
+    let tabsHTML = `
+      <button class="school-tab-btn ${selectedAngkatan === 'ALL' ? 'active' : ''}" onclick="selectAngkatan('ALL')">
+        🎓 Semua Angkatan (${allMembersData.length})
+      </button>
+    `;
+
+    tabsHTML += angkatans.map(ang => {
+      const count = allMembersData.filter(u => String(u.angkatan || '').trim() === ang).length;
+      return `
+        <button class="school-tab-btn ${ang === selectedAngkatan ? 'active' : ''}" onclick="selectAngkatan('${ang.replace(/'/g, "\\'")}')">
+          Angkatan ${ang} (${count})
+        </button>
+      `;
+    }).join('');
+
+    container.innerHTML = tabsHTML;
+  }
+
   function renderSchoolTabs() {
     const container = document.getElementById('schoolTabsContainer');
     if (!container) return;
 
     if (!allMembersData.length) {
       container.innerHTML = '<p style="font-size:13px; color:#6b7280;">Belum ada data pendaftar.</p>';
-      renderMemberTables();
       return;
     }
 
@@ -72,13 +110,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }).join('');
 
     container.innerHTML = tabsHTML;
-    renderMemberTables();
   }
+
+  window.selectAngkatan = function(ang) {
+    selectedAngkatan = ang;
+    renderFilterTabs();
+  };
+
+  window.selectKelasFilter = function(kls) {
+    selectedKelas = kls;
+    renderMemberTables();
+  };
 
   window.selectSchool = function(sch) {
     selectedSchool = sch;
     document.getElementById('schoolSuggestionsBox')?.classList.add('hidden');
-    renderSchoolTabs();
+    renderFilterTabs();
   };
 
   window.handleSearchInput = function() {
@@ -113,14 +160,18 @@ document.addEventListener('DOMContentLoaded', () => {
     selectedSchool = schoolName;
     input.value = '';
     sugBox.classList.add('hidden');
-    renderSchoolTabs();
+    renderFilterTabs();
   };
 
   window.resetSearchFilter = function() {
     document.getElementById('memberSearchInput').value = '';
     document.getElementById('schoolSuggestionsBox').classList.add('hidden');
+    const kelasSelect = document.getElementById('adminFilterKelasSelect');
+    if (kelasSelect) kelasSelect.value = 'ALL';
     selectedSchool = 'ALL';
-    renderSchoolTabs();
+    selectedAngkatan = 'ALL';
+    selectedKelas = 'ALL';
+    renderFilterTabs();
   };
 
   function renderMemberTables() {
@@ -130,35 +181,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const filtered = allMembersData.filter(u => {
       const userSchool = String(u.sekolah || 'SMPN 7 Pontianak').trim();
+      const userAngkatan = String(u.angkatan || '').trim();
+      const userKelas = String(u.kelas || '').trim();
+      const userKelasFull = `${userKelas}${String(u.subKelas || '').trim()}`.toLowerCase();
       const userName = String(u.nama || '').toLowerCase();
       const userNik = String(u.nik || '').toLowerCase();
 
       const matchSchoolTab = (selectedSchool === 'ALL') || (userSchool === selectedSchool);
-      const matchSearch = !searchVal || userName.includes(searchVal) || userNik.includes(searchVal) || userSchool.toLowerCase().includes(searchVal);
-      return matchSchoolTab && matchSearch;
+      const matchAngkatanTab = (selectedAngkatan === 'ALL') || (userAngkatan === selectedAngkatan);
+      const matchKelasFilter = (selectedKelas === 'ALL') || (userKelas === selectedKelas);
+      const matchSearch = !searchVal
+        || userName.includes(searchVal)
+        || userNik.includes(searchVal)
+        || userSchool.toLowerCase().includes(searchVal)
+        || userKelasFull.includes(searchVal)
+        || userAngkatan.toLowerCase().includes(searchVal);
+
+      return matchSchoolTab && matchAngkatanTab && matchKelasFilter && matchSearch;
     });
 
     const pending = filtered.filter(u => !u.status || String(u.status).toUpperCase() === 'PENDING');
     const approved = filtered.filter(u => String(u.status).toUpperCase() === 'APPROVED');
 
-    pendingTbody.innerHTML = pending.length ? pending.map(u => `
-      <tr>
-        <td><img src="${u.foto || 'https://via.placeholder.com/40'}" class="admin-avatar-img" onclick="openZoomImage(this.src)"></td>
-        <td><strong>${u.nama}</strong><br><small>NIK: ${u.nik}</small><br><small>Ortu: ${u.namaOrtu || '-'} (${u.noOrtu || '-'})</small></td>
-        <td>${u.sekolah}<br><strong>${u.tingkatan || 'Mula'}</strong></td>
-        <td>
-          <button onclick="openMemberPopup(${u.id})" class="btn-primary-admin" style="padding:6px 12px; font-size:12px;">⚙️ Atur / Verifikasi</button>
-          <button onclick="deleteMember(${u.id})" style="background:#ef4444; color:white; border:none; padding:6px 10px; border-radius:6px; font-size:12px; cursor:pointer; margin-left:4px;">Hapus</button>
-        </td>
-      </tr>
-    `).join('') : `<tr><td colspan="4" style="text-align:center; padding:12px;">Tidak ada data pending.</td></tr>`;
+    pendingTbody.innerHTML = pending.length ? pending.map(u => {
+      const kelasBadge = u.kelas ? `Kelas ${u.kelas}${u.subKelas || ''}` : '-';
+      return `
+        <tr>
+          <td><img src="${u.foto || 'https://via.placeholder.com/40'}" class="admin-avatar-img" onclick="openZoomImage(this.src)"></td>
+          <td><strong>${u.nama}</strong><br><small>NIK: ${u.nik}</small><br><small>Ortu: ${u.namaOrtu || '-'} (${u.noOrtu || '-'})</small></td>
+          <td><span class="badge-pill-info">${kelasBadge}</span><br><small>Angkatan: <strong>${u.angkatan || '-'}</strong></small></td>
+          <td>${u.sekolah}<br><strong>${u.tingkatan || 'Mula'}</strong></td>
+          <td>
+            <button onclick="openMemberPopup(${u.id})" class="btn-primary-admin" style="padding:6px 12px; font-size:12px;">⚙️ Atur / Verifikasi</button>
+            <button onclick="deleteMember(${u.id})" style="background:#ef4444; color:white; border:none; padding:6px 10px; border-radius:6px; font-size:12px; cursor:pointer; margin-left:4px;">Hapus</button>
+          </td>
+        </tr>
+      `;
+    }).join('') : `<tr><td colspan="5" style="text-align:center; padding:12px;">Tidak ada data pending.</td></tr>`;
 
     approvedTbody.innerHTML = approved.length ? approved.map(u => {
       const totalPoin = ((parseInt(u.hadir) || 0) * 10) + (parseInt(u.skorLain) || 0);
+      const kelasBadge = u.kelas ? `Kelas ${u.kelas}${u.subKelas || ''}` : '-';
       return `
         <tr>
           <td><img src="${u.foto || 'https://via.placeholder.com/40'}" class="admin-avatar-img" onclick="openZoomImage(this.src)"></td>
           <td><strong>${u.nama}</strong><br><small>NIK: ${u.nik}</small><br><small>${u.sekolah}</small></td>
+          <td><span class="badge-pill-info">${kelasBadge}</span><br><small>Angkatan: <strong>${u.angkatan || '-'}</strong></small></td>
           <td><span class="badge-pill-info">${u.jabatan || 'Anggota'}</span><br><small>Tingkat: <strong>${u.tingkatan || 'Mula'}</strong></small></td>
           <td>H: <strong>${u.hadir || 0}</strong> | I: <strong>${u.izin || 0}</strong> | A: <strong>${u.alpha || 0}</strong><br><small style="color:#15803d; font-weight:700;">Total Skor: ${totalPoin} PTS</small></td>
           <td>
@@ -167,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </td>
         </tr>
       `;
-    }).join('') : `<tr><td colspan="5" style="text-align:center; padding:12px;">Tidak ada data anggota aktif.</td></tr>`;
+    }).join('') : `<tr><td colspan="6" style="text-align:center; padding:12px;">Tidak ada data anggota aktif.</td></tr>`;
   }
 
   // Buka Popup Kustom Pilihan Anggota & Langsung Perbarui Layar
@@ -176,11 +244,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!member) return;
 
     AdminPopup.openMemberEditor(member, async (updatedData) => {
-      // Langsung update state lokal agar perubahan langsung terlihat di layar
       const idx = allMembersData.findIndex(m => String(m.id) === String(updatedData.id));
       if (idx !== -1) {
         allMembersData[idx] = { ...allMembersData[idx], ...updatedData };
-        renderSchoolTabs();
+        renderFilterTabs();
       }
 
       try {
@@ -190,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const result = await res.json();
         if (result.status === 'success') {
-          AdminPopup.showConfirm({ title: 'Berhasil', message: 'Perubahan status, tingkatan, jabatan, absen & poin telah tersimpan!' });
+          AdminPopup.showConfirm({ title: 'Berhasil', message: 'Perubahan data anggota telah tersimpan!' });
           fetchAdminData();
         } else {
           AdminPopup.showConfirm({ title: 'Gagal', message: result.message || 'Gagal menyimpan ke server.' });

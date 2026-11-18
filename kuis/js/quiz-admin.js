@@ -1,5 +1,5 @@
 /**
- * SIAMO PMR - Logika Admin Navigasi & Live Lobby (quiz/js/quiz-admin-nav.js)
+ * SIAMO PMR - Logika Admin Kuis Lengkap (quiz/js/quiz-admin.js)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -24,9 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
       document.getElementById('pageHeaderTitle').innerText = titles[targetId] || 'Panel Admin';
 
-      if (targetId === 'panelRekap') {
-        QuizNavMaster.loadRecapList();
-      } else if (targetId === 'panelSukaSuka') {
+      if (targetId === 'panelRekap' || targetId === 'panelSukaSuka') {
         QuizNavMaster.loadActiveSukaRooms();
       }
     });
@@ -41,8 +39,17 @@ document.addEventListener('DOMContentLoaded', () => {
 const QuizNavMaster = {
   data: { suka: [], harian: [], ujian: [] },
 
+  toggleDuration(type, isChecked) {
+    const inputDur = document.getElementById('duration' + type);
+    if (inputDur) {
+      inputDur.disabled = !isChecked;
+      inputDur.style.background = isChecked ? '#fff' : '#e5e7eb';
+    }
+  },
+
   showModal(title, message) {
     const modal = document.getElementById('customAdminModal');
+    if (!modal) return;
     document.getElementById('modalTitle').innerText = title;
     document.getElementById('modalMessage').innerText = message;
     modal.classList.remove('hidden');
@@ -147,12 +154,21 @@ const QuizNavMaster = {
     const mapKey = categoryType === 'sukasuka' ? 'suka' : (categoryType === 'harian' ? 'harian' : 'ujian');
     const titleId = 'title' + mapKey.charAt(0).toUpperCase() + mapKey.slice(1);
     const durationId = 'duration' + mapKey.charAt(0).toUpperCase() + mapKey.slice(1);
+    const timerCheckId = 'checkUseTimer' + mapKey.charAt(0).toUpperCase() + mapKey.slice(1);
 
-    const title = document.getElementById(titleId).value.trim();
-    const duration = document.getElementById(durationId).value;
+    const titleInput = document.getElementById(titleId);
+    const durationInput = document.getElementById(durationId);
+    const timerCheckbox = document.getElementById(timerCheckId);
+    
+    const title = titleInput ? titleInput.value.trim() : '';
+    const duration = durationInput ? durationInput.value : 30;
+    const useTimer = timerCheckbox ? timerCheckbox.checked : true;
     const listSoal = this.data[mapKey];
 
-    if (!title) { this.showModal('Peringatan', 'Judul wajib diisi!'); return; }
+    if (!title) { 
+      this.showModal('Peringatan', 'Judul kuis wajib diisi!'); 
+      return; 
+    }
 
     const payload = {
       action: 'createQuiz',
@@ -160,6 +176,7 @@ const QuizNavMaster = {
       category: categoryType,
       duration: duration,
       maxScore: 100,
+      useTimer: useTimer,
       questions: listSoal
     };
 
@@ -170,50 +187,74 @@ const QuizNavMaster = {
       });
       const data = await res.json();
       if (data.status === 'success') {
-        this.showModal('Sukses', 'Berhasil dipublikasikan!');
-        document.getElementById(titleId).value = '';
+        this.showModal('Sukses', 'Kuis berhasil dipublikasikan!');
+        if (titleInput) titleInput.value = '';
         this.data[mapKey] = [];
         this.addCard(mapKey);
-        if (categoryType === 'sukasuka') this.loadActiveSukaRooms();
+        this.loadActiveSukaRooms();
       } else {
-        this.showModal('Gagal', data.message);
+        this.showModal('Gagal', data.message || 'Gagal menyimpan ke server.');
       }
     } catch (err) {
-      this.showModal('Error', err);
+      this.showModal('Error', 'Terjadi kesalahan jaringan: ' + err);
     }
   },
 
   async loadActiveSukaRooms() {
     const container = document.getElementById('adminSukaRoomsList');
-    if (!container) return;
-    container.innerHTML = '<p class="text-center">Memuat room...</p>';
+    if (container) container.innerHTML = '<p class="text-center">Memuat room...</p>';
 
     try {
       const res = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getQuizList&t=${Date.now()}`);
       const quizzes = await res.json();
-      const list = Array.isArray(quizzes) ? quizzes.filter(q => String(q.category || '').trim().toLowerCase() === 'sukasuka' && String(q.status || '').toUpperCase() !== 'FINISHED') : [];
+      const allList = Array.isArray(quizzes) ? quizzes : [];
+      const sukaList = allList.filter(q => String(q.category || '').trim().toLowerCase() === 'sukasuka' && String(q.status || '').toUpperCase() !== 'FINISHED');
 
-      if (!list.length) {
-        container.innerHTML = '<p style="color:#6b7280; font-size:13px; text-align:center;">Belum ada room suka-suka aktif.</p>';
-        return;
+      if (container) {
+        if (!sukaList.length) {
+          container.innerHTML = '<p style="color:#6b7280; font-size:13px; text-align:center;">Belum ada room Suka-Suka aktif.</p>';
+        } else {
+          container.innerHTML = sukaList.map(q => `
+            <div class="quiz-item-card" style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+              <div>
+                <strong>${q.title}</strong>
+                <p id="roomCount_${q.id}" style="margin:4px 0 0 0; font-size:12px; color:var(--rh-purple); font-weight:700;">Peserta bergabung: Memuat...</p>
+              </div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button type="button" onclick="QuizNavMaster.startSukaRoom('${q.id}', '${q.title}')" class="btn-publish-quiz" style="padding:6px 10px; font-size:11px; background:#16a34a;">▶️ Mulai</button>
+                <button type="button" onclick="QuizNavMaster.viewSubmissions('${q.id}', '${q.title}')" class="btn-small-primary" style="background:#5c3d99; padding:6px 10px; font-size:11px;">📊 Rekap</button>
+                <button type="button" onclick="QuizNavMaster.finishSukaRoom('${q.id}', '${q.title}')" class="btn-delete-question" style="padding:6px 10px; font-size:11px; background:#f59e0b; color:#1a1a1a;">⏹️ Tutup</button>
+                <button type="button" onclick="QuizNavMaster.deleteRoom('${q.id}', '${q.title}')" class="btn-delete-question" style="padding:6px 10px; font-size:11px;">🗑️ Hapus</button>
+              </div>
+            </div>
+          `).join('');
+          sukaList.forEach(q => this.pollAdminRoom(q.id));
+        }
       }
 
-      container.innerHTML = list.map(q => `
-        <div class="quiz-item-card" style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <strong>${q.title}</strong>
-            <p id="roomCount_${q.id}" style="margin:4px 0 0 0; font-size:12px; color:var(--rh-purple); font-weight:700;">Peserta bergabung: Memuat...</p>
-          </div>
-          <div style="display:flex; gap:8px;">
-            <button type="button" onclick="QuizNavMaster.startSukaRoom('${q.id}', '${q.title}')" class="btn-publish-quiz" style="padding:8px 14px; font-size:12px; background:#16a34a;">▶️ Mulai</button>
-            <button type="button" onclick="QuizNavMaster.finishSukaRoom('${q.id}', '${q.title}')" class="btn-delete-question" style="padding:8px 14px; font-size:12px;">⏹️ Selesaikan</button>
-          </div>
-        </div>
-      `).join('');
-
-      list.forEach(q => this.pollAdminRoom(q.id));
+      const recapCont = document.getElementById('containerQuizRecap');
+      if (recapCont) {
+        if (!allList.length) {
+          recapCont.innerHTML = '<p class="text-center">Belum ada kuis.</p>';
+        } else {
+          recapCont.innerHTML = allList.map(q => `
+            <div class="quiz-item-card" style="margin-bottom: 12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+              <div>
+                <strong>${q.title}</strong>
+                <p style="font-size:12px; color:#4b5563; margin:2px 0 0 0;">
+                  📅 Dibuat: <strong>${q.createdAt || '-'}</strong> • Kategori: <strong>${q.category.toUpperCase()}</strong> • Mode Waktu: <strong>${q.useTimer ? `${q.duration} Menit` : 'Tanpa Batas Waktu'}</strong>
+                </p>
+              </div>
+              <div style="display:flex; gap:6px;">
+                <button type="button" onclick="QuizNavMaster.viewSubmissions('${q.id}', '${q.title}')" class="btn-small-primary" style="padding:6px 10px; font-size:11px;">📋 Rekap</button>
+                <button type="button" onclick="QuizNavMaster.deleteRoom('${q.id}', '${q.title}')" class="btn-delete-question" style="padding:6px 10px; font-size:11px;">🗑️ Hapus</button>
+              </div>
+            </div>
+          `).join('');
+        }
+      }
     } catch(e) {
-      container.innerHTML = '<p style="color:red; text-align:center;">Gagal memuat room.</p>';
+      if (container) container.innerHTML = '<p style="color:red; text-align:center;">Gagal memuat room.</p>';
     }
   },
 
@@ -223,7 +264,7 @@ const QuizNavMaster = {
       const data = await res.json();
       const el = document.getElementById(`roomCount_${quizId}`);
       if (el) {
-        const names = data.participants.map(p => p.name).join(', ') || 'Belum ada';
+        const names = data.participants.map(p => p.name).join(', ') || 'Belum ada yang join';
         el.innerText = `Peserta (${data.participants.length}): ${names}`;
       }
     } catch(e) {}
@@ -235,14 +276,15 @@ const QuizNavMaster = {
         method: 'POST',
         body: JSON.stringify({ action: 'startQuizRoom', quizId: quizId })
       });
-      this.showModal('Mulai Kuis!', `Room "${title}" telah dimulai secara serentak!`);
+      this.showModal('Mulai Kuis!', `Room "${title}" telah dimulai secara serentak untuk seluruh peserta!`);
+      this.loadActiveSukaRooms();
     } catch(e) {
       this.showModal('Error', 'Gagal memulai room.');
     }
   },
 
   async finishSukaRoom(quizId, title) {
-    if (!confirm(`Yakin ingin menyelesaikan room "${title}"? Peserta tidak akan bisa join lagi.`)) return;
+    if (!confirm(`Yakin ingin menutup room "${title}"? Peserta tidak akan bisa join lagi.`)) return;
     try {
       await fetch(CONFIG.APPS_SCRIPT_URL, {
         method: 'POST',
@@ -255,42 +297,71 @@ const QuizNavMaster = {
     }
   },
 
-  async loadRecapList() {
-    const cont = document.getElementById('containerQuizRecap');
-    cont.innerHTML = '<p class="text-center">Memuat daftar...</p>';
+  async deleteRoom(quizId, title) {
+    if (!confirm(`Yakin ingin menghapus "${title}" secara permanen? Semua soal di dalamnya akan terhapus.`)) return;
     try {
-      const res = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getQuizList&t=${Date.now()}`);
-      const quizzes = await res.json();
-      const list = Array.isArray(quizzes) ? quizzes : [];
-      if (!list.length) { cont.innerHTML = '<p class="text-center">Belum ada kuis.</p>'; return; }
-      cont.innerHTML = list.map(q => `
-        <div class="quiz-item-card" style="margin-bottom: 12px;">
-          <div><strong>${q.title}</strong><p style="font-size:12px; color:#4b5563; margin:2px 0 0 0;">Kategori: <strong>${q.category.toUpperCase()}</strong></p></div>
-          <button type="button" onclick="QuizNavMaster.viewSubmissions('${q.id}', '${q.title}')" class="btn-small-primary">📋 Lihat Rekap</button>
-        </div>
-      `).join('');
-    } catch (err) { cont.innerHTML = '<p class="text-center" style="color:#d9381e;">Gagal memuat.</p>'; }
+      const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'deleteQuizRoom', quizId: quizId })
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        this.showModal('Terhapus', `Kuis "${title}" berhasil dihapus.`);
+        this.loadActiveSukaRooms();
+      } else {
+        this.showModal('Gagal', data.message || 'Gagal menghapus.');
+      }
+    } catch(e) {
+      this.showModal('Error', 'Terjadi kesalahan jaringan.');
+    }
   },
 
   async viewSubmissions(quizId, quizTitle) {
     const modal = document.getElementById('quizSubmissionsModal');
     const titleEl = document.getElementById('subModalTitle');
     const bodyEl = document.getElementById('subModalBody');
-    titleEl.innerText = `Rekap: ${quizTitle}`;
-    bodyEl.innerHTML = '<p class="text-center">Memuat...</p>';
+    if (!modal) return;
+
+    titleEl.innerText = `Rekap Detail: ${quizTitle}`;
+    bodyEl.innerHTML = '<p class="text-center">Memuat rekap...</p>';
     modal.classList.remove('hidden');
 
     try {
       const res = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getQuizSubmissions&quizId=${quizId}&t=${Date.now()}`);
       const subs = await res.json();
       const list = Array.isArray(subs) ? subs : [];
-      if (!list.length) { bodyEl.innerHTML = '<p class="text-center" style="padding:20px; color:#6b7280;">Belum ada siswa yang mengerjakan.</p>'; return; }
+
+      if (!list.length) {
+        bodyEl.innerHTML = '<p class="text-center" style="padding:20px; color:#6b7280;">Belum ada siswa yang menyelesaikan kuis ini.</p>';
+        return;
+      }
+
       bodyEl.innerHTML = `
         <table style="width:100%; border-collapse:collapse; font-size:13px;">
-          <thead><tr style="border-bottom:2px solid #1a1a1a; text-align:left;"><th style="padding:8px;">No</th><th style="padding:8px;">Nama Siswa</th><th style="padding:8px;">Skor</th><th style="padding:8px;">Waktu</th></tr></thead>
-          <tbody>${list.map((s, i) => `<tr style="border-bottom:1px solid #e5e7eb;"><td style="padding:8px;">${i + 1}</td><td style="padding:8px;"><strong>${s.memberName}</strong></td><td style="padding:8px; color:#16a34a; font-weight:700;">${s.score} PTS</td><td style="padding:8px;"><small>${s.timestamp}</small></td></tr>`).join('')}</tbody>
+          <thead>
+            <tr style="border-bottom:2px solid #1a1a1a; text-align:left;">
+              <th style="padding:8px;">No</th>
+              <th style="padding:8px;">Nama Siswa</th>
+              <th style="padding:8px;">Benar</th>
+              <th style="padding:8px;">Salah</th>
+              <th style="padding:8px;">Total Poin</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${list.map((s, i) => `
+              <tr style="border-bottom:1px solid #e5e7eb;">
+                <td style="padding:8px;">${i + 1}</td>
+                <td style="padding:8px;"><strong>${s.memberName}</strong><br><small style="color:#6b7280;">${s.memberEmail}</small></td>
+                <td style="padding:8px; color:#16a34a; font-weight:800;">${s.correctCount}</td>
+                <td style="padding:8px; color:#d9381e; font-weight:800;">${s.wrongCount}</td>
+                <td style="padding:8px; color:#5c3d99; font-weight:800; font-size:15px;">${s.score} PTS</td>
+              </tr>
+            `).join('')}
+          </tbody>
         </table>
       `;
-    } catch (err) { bodyEl.innerHTML = '<p class="text-center" style="color:#d9381e;">Gagal memuat rekap.</p>'; }
+    } catch (err) {
+      bodyEl.innerHTML = '<p class="text-center" style="color:#d9381e;">Gagal memuat rekap nilai.</p>';
+    }
   }
 };
