@@ -391,7 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
         contQuiz.innerHTML = sortedQuiz.map((u, i) => `
           <div class="rank-item">
             <div class="rank-left"><div class="rank-badge">${i + 1}</div><div class="rank-user-info"><h4>${u.nama}</h4><p>${u.sekolah}</p></div></div>
-            <div class="rank-score">${u.skorKuis || 0} PTS</div>
+            <div class="rank-score">${u.skorKuis || 0} POIN</div>
           </div>
         `).join('');
       }
@@ -401,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
         contGame.innerHTML = sortedGame.map((u, i) => `
           <div class="rank-item">
             <div class="rank-left"><div class="rank-badge">${i + 1}</div><div class="rank-user-info"><h4>${u.nama}</h4><p>${u.sekolah}</p></div></div>
-            <div class="rank-score">${u.skorGame || 0} PTS</div>
+            <div class="rank-score">${u.skorGame || 0} POIN</div>
           </div>
         `).join('');
       }
@@ -415,7 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
         contLatihan.innerHTML = sortedPoin.map((u, i) => `
           <div class="rank-item">
             <div class="rank-left"><div class="rank-badge">${i + 1}</div><div class="rank-user-info"><h4>${u.nama}</h4><p>${u.hadir || 0} Hadir • ${u.sekolah}</p></div></div>
-            <div class="rank-score">${u.totalPoin} PTS</div>
+            <div class="rank-score">${u.totalPoin} POIN</div>
           </div>
         `).join('');
       }

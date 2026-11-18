@@ -14,8 +14,8 @@
   <div class="app-container">
     <nav id="appNavbar" class="navbar hidden">
       <div class="nav-brand">
-        <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-        <span>SIAMO PMR</span>
+        <img src="/assets/images/logo.jpg" alt="logo pmi" class="logo_pmi">
+        <span>PARALA</span>
       </div>
       <div class="nav-menu">
         <button class="nav-link active" data-target="pageHome" title="Beranda">
@@ -89,7 +89,11 @@
           <div class="profile-header-box">
             <div class="avatar-container">
               <img id="profileAvatar" src="" alt="Foto Profil" class="profile-avatar zoomable" onclick="openZoomImage(this.src)">
-              <label for="changePhotoInput" class="badge-edit-photo" title="Ubah Foto">✏️</label>
+              <label for="changePhotoInput" class="badge-edit-photo" title="Ubah Foto">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 7h3l2-2h6l2 2h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm8 11a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0-2a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                </svg>
+            </label>
               <input type="file" id="changePhotoInput" accept="image/*" class="hidden">
             </div>
             <div>
@@ -121,11 +125,11 @@
                 </div>
               </div>
             </div>
-            <button onclick="downloadIdCard()" class="btn-primary" style="margin-top: 18px; width: 100%;">📥 Download Kartu (PNG)</button>
+            <button onclick="downloadIdCard()" class="btn-primary" style="margin-top: 18px; width: 100%;">Download Kartu (PNG)</button>
           </div>
 
           <div class="attendance-summary">
-            <h4>📊 Rekap Kehadiran & Poin</h4>
+            <h4>Rekap Kehadiran & Poin</h4>
             <div class="attendance-grid">
               <div class="att-box green"><span id="attHadir">0</span><p>Hadir (+10)</p></div>
               <div class="att-box yellow"><span id="attIzin">0</span><p>Izin</p></div>
@@ -140,7 +144,7 @@
       <!-- PAGE MEMBERS -->
       <div id="pageMembers" class="page-section hidden">
         <div class="card">
-          <h3>👥 Daftar Anggota Aktif PMR</h3>
+          <h3>Daftar Anggota Aktif PMR</h3>
           <div id="publicAngkatanFilterContainer" style="display:flex; flex-wrap:wrap; gap:8px; margin: 14px 0 18px 0;"></div>
           <div class="members-grid" id="membersGridContainer"><p class="text-center">Memuat...</p></div>
         </div>
@@ -149,11 +153,11 @@
       <!-- PAGE RANK -->
       <div id="pageRank" class="page-section hidden">
         <div class="card">
-          <h2>🏆 Peringkat Anggota (Leaderboard)</h2>
+          <h2>Leaderboard</h2>
           <div class="tab-switcher" style="margin-bottom: 20px;">
             <button id="btnRankQuiz" class="tab-btn active" onclick="switchRankTab('quiz')">Skor Kuis</button>
             <button id="btnRankGame" class="tab-btn" onclick="switchRankTab('game')">Skor Game</button>
-            <button id="btnRankLatihan" class="tab-btn" onclick="switchRankTab('latihan')">Total Poin</button>
+            <button id="btnRankLatihan" class="tab-btn" onclick="switchRankTab('latihan')">Poin Keaktivan</button>
           </div>
           <div id="rankQuizContainer" class="rank-list-container"></div>
           <div id="rankGameContainer" class="rank-list-container hidden"></div>
@@ -164,7 +168,7 @@
       <!-- PAGE ACTIVITIES -->
       <div id="pageActivities" class="page-section hidden">
         <div class="card">
-          <h2>📅 Jadwal & Pendaftaran Kegiatan PMR</h2>
+          <h2>daftar Kegiatan PMR</h2>
           <div id="publicActivitiesContainer" class="activities-grid"><p class="text-center">Memuat kegiatan...</p></div>
         </div>
       </div>
@@ -172,7 +176,7 @@
       <!-- PAGE BOOKS -->
       <div id="pageBooks" class="page-section hidden">
         <div class="card">
-          <h2>📚 Perpustakaan Buku & Modul PMR</h2>
+          <h2>Perpustakaan Buku</h2>
           <div id="publicBooksContainer" class="books-grid"><p class="text-center">Memuat perpustakaan...</p></div>
         </div>
       </div>
@@ -180,7 +184,7 @@
       <!-- PAGE DOCS -->
       <div id="pageDocs" class="page-section hidden">
         <div class="card">
-          <h2>📷 Dokumentasi Kegiatan</h2>
+          <h2>Dokumentasi Kegiatan</h2>
           <div class="tab-switcher" style="margin-bottom: 20px;">
             <button id="btnDocLomba" class="tab-btn active" onclick="switchDocTab('lomba')">Lomba</button>
             <button id="btnDocUmum" class="tab-btn" onclick="switchDocTab('umum')">Umum</button>
@@ -193,15 +197,15 @@
       <!-- PAGE QUIZ -->
       <div id="pageQuiz" class="page-section hidden">
         <div class="card text-center" style="padding: 60px 20px;">
-          <h2>🚀 Kuis PMR Interaktif</h2>
-          <a href="#" target="_blank" class="btn-primary" style="display:inline-block; text-decoration:none; margin-top:20px; padding: 10px 24px;">Buka Web Kuis ↗</a>
+          <h2>Kuis</h2>
+          <a href="/kuis/index.html" target="_blank" class="btn-primary" style="display:inline-block; text-decoration:none; margin-top:20px; padding: 10px 24px;">Buka Web Kuis ↗</a>
         </div>
       </div>
 
       <!-- PAGE GAME -->
       <div id="pageGame" class="page-section hidden">
         <div class="card text-center" style="padding: 60px 20px;">
-          <h2>🎮 Mini Game: Pertolongan Pertama</h2>
+          <h2>Mini Game</h2>
           <a href="#" target="_blank" class="btn-primary" style="display:inline-block; text-decoration:none; margin-top:20px; padding: 10px 24px;">Buka Web Game ↗</a>
         </div>
       </div>
@@ -213,7 +217,7 @@
     </div>
 
     <footer class="app-footer">
-      <p>&copy; 2026 <strong>SIAMO PMR SMPN 7 Pontianak</strong>. All Rights Reserved.</p>
+      <p>&copy; 2026 <strong>PMR SMPN 7 Pontianak</strong>. All Rights.</p>
     </footer>
   </div>
 
