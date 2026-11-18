@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arena Kuis - SIAMO PMR</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/public.css">
+  <link rel="stylesheet" href="css/quiz.css">
+</head>
+<body>
+  <div class="simple-quiz-container">
+    <div class="quiz-top-nav">
+      <a href="../index.html">← Kembali ke Beranda</a>
+      <span id="quizUserGreeting">Halo, Anggota</span>
+    </div>
+
+    <div class="quiz-content-box">
+      <!-- 1. MENU UTAMA -->
+      <div id="quizMainHub" class="quiz-section-block">
+        <div class="quiz-title-area">
+          <h2>Arena Kuis & Ujian PMR</h2>
+          <p>Pilih mode kuis di bawah ini untuk mulai belajar atau menguji kemampuanmu.</p>
+        </div>
+        <div class="quiz-btn-stack">
+          <button type="button" class="btn-quiz-choice suka" onclick="QuizClient.selectMode('sukasuka')">
+            <span class="icon">🎉</span>
+            <div class="text"><strong>Main Suka-Suka</strong><small>Kuis seru interaktif, latihan santai tanpa beban nilai.</small></div>
+          </button>
+          <button type="button" class="btn-quiz-choice serius" onclick="QuizClient.selectMode('serius')">
+            <span class="icon">📝</span>
+            <div class="text"><strong>Main Serius</strong><small>Tugas harian dan ujian resmi, nilai langsung masuk ke akunmu.</small></div>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. SUB-MENU MAIN SERIUS -->
+      <div id="quizSeriusSubMenu" class="quiz-section-block hidden">
+        <div class="quiz-title-area">
+          <h2>Portal Tugas & Ujian</h2>
+          <p>Pilih kategori tugas yang ingin dikerjakan.</p>
+        </div>
+        <div class="simple-tab-row">
+          <button id="btnSeriusHarian" class="tab-chip active" onclick="QuizClient.switchSeriusTab('harian')">Tugas Harian</button>
+          <button id="btnSeriusUjian" class="tab-chip" onclick="QuizClient.switchSeriusTab('ujian')">Ujian Resmi</button>
+        </div>
+        <div id="quizSeriusListContainer" class="quiz-list-stack">
+          <p class="loading-text">Sedang memuat data...</p>
+        </div>
+        <div style="margin-top: 25px; text-align: center;">
+          <button type="button" class="btn-text-back" onclick="QuizClient.backToHub()">← Kembali ke Menu Utama</button>
+        </div>
+      </div>
+
+      <!-- 3. AREA SOAL -->
+      <div id="quizPlayArea" class="quiz-section-block hidden">
+        <div class="quiz-play-header">
+          <h3 id="activeQuizTitle">Judul Kuis</h3>
+          <span class="timer-badge">Sisa Waktu: <strong id="timeLeft">30</strong> detik</span>
+        </div>
+        <div id="quizQuestionContainer" class="question-box"></div>
+        <div style="margin-top: 20px; text-align: right;">
+          <button type="button" id="btnNextQuizQuestion" onclick="QuizClient.nextQuestion()" class="btn-submit-answer hidden">Selanjutnya →</button>
+        </div>
+      </div>
+
+      <!-- 4. HASIL SELESAI -->
+      <div id="quizPodiumArea" class="quiz-section-block hidden text-center">
+        <div class="quiz-title-area">
+          <h2>Kuis Selesai! 🎉</h2>
+          <p>Terima kasih sudah menyelesaikan tantangan ini.</p>
+        </div>
+        <div class="final-score-card">
+          <span>Skor Akhir Kamu</span>
+          <h1 id="finalScoreDisplay">0</h1>
+        </div>
+        <div style="margin-top: 30px;">
+          <button type="button" class="btn-quiz-choice suka" onclick="QuizClient.backToHub()" style="justify-content: center;">Kembali ke Menu Utama</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/auth-session.js"></script>
+  <script src="js/quiz-client.js"></script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIAMO PMR - SMPN 7 Pontianak</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/public.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+  <div class="background-blob"></div>
+
+  <div class="app-container">
+    <nav id="appNavbar" class="navbar hidden">
+      <div class="nav-brand">
+        <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>SIAMO PMR</span>
+      </div>
+      <div class="nav-menu">
+        <button class="nav-link active" data-target="pageHome" title="Beranda">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </button>
+        <button class="nav-link" data-target="pageMembers" title="Anggota">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </button>
+        <button class="nav-link" data-target="pageRank" title="Peringkat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        </button>
+        <button class="nav-link" data-target="pageActivities" title="Kegiatan">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </button>
+        <button class="nav-link" data-target="pageBooks" title="Buku PMR">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        </button>
+        <button class="nav-link" data-target="pageDocs" title="Dokumentasi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </button>
+        <button class="nav-link" data-target="pageQuiz" title="Kuis">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+        </button>
+        <button class="nav-link" data-target="pageGame" title="Game">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4m-2-2v4"/><circle cx="15" cy="11" r="1"/><circle cx="18" cy="13" r="1"/></svg>
+        </button>
+      </div>
+      <div class="nav-profile-menu">
+        <div class="notification-badge-wrapper" id="notifBellBtn" title="Notifikasi Kegiatan">🔔 <span id="notifCount" class="notif-dot hidden">0</span></div>
+        <button class="nav-avatar-btn nav-link" data-target="pageProfile" title="Profil Saya"><img id="navUserAvatar" src="https://via.placeholder.com/40" alt="Profil"></button>
+        <button id="btnLogout" class="btn-logout-nav" title="Keluar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div id="dynamicAuthContainer"></div>
+
+      <section id="pendingPanel" class="card hidden text-center">
+        <div class="icon-status warning">⏳</div>
+        <h2>Pendaftaran Sedang Ditinjau</h2>
+        <p>Akun kamu sudah terdaftar. Admin PMR sedang memverifikasi data kamu.</p>
+        <button onclick="location.reload()" class="btn-secondary">Kembali</button>
+      </section>
+
+      <!-- PAGE HOME -->
+      <div id="pageHome" class="page-section hidden">
+        <div class="hero-card">
+          <h2 id="homeHeroTitle">Memuat Beranda...</h2>
+          <p id="homeHeroDesc">Memuat informasi portal...</p>
+        </div>
+        <div class="card info-card" style="margin-bottom: 20px;">
+          <h3>📍 Informasi Jadwal & Lokasi Latihan</h3>
+          <div class="schedule-grid">
+            <div class="schedule-box"><span class="schedule-icon">🗓️</span><div><h4>Jadwal Latihan</h4><p id="scheduleTimeText">Memuat...</p></div></div>
+            <div class="schedule-box"><span class="schedule-icon">🏫</span><div><h4>Lokasi Latihan</h4><p id="scheduleLocText">Memuat...</p></div></div>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-box"><h3>Total Anggota</h3><p id="statTotalMembers">120+</p><span>Terdaftar Aktif</span></div>
+          <div class="stat-box"><h3>Angkatan / Periode</h3><p id="statCurrentBatch">2025 / 2026</p><span>Aktif Membina</span></div>
+        </div>
+        <div class="card info-card">
+          <h3>📞 Kontak Pengurus Inti</h3>
+          <div class="contact-grid" id="homeContactsContainer"><p class="text-center">Memuat kontak...</p></div>
+        </div>
+      </div>
+
+      <!-- PAGE PROFILE -->
+      <div id="pageProfile" class="page-section hidden">
+        <div class="card profile-card-main">
+          <div class="profile-header-box">
+            <div class="avatar-container">
+              <img id="profileAvatar" src="" alt="Foto Profil" class="profile-avatar zoomable" onclick="openZoomImage(this.src)">
+              <label for="changePhotoInput" class="badge-edit-photo" title="Ubah Foto">✏️</label>
+              <input type="file" id="changePhotoInput" accept="image/*" class="hidden">
+            </div>
+            <div>
+              <h2 id="userGreeting">Nama Anggota</h2>
+              <p class="badge-code" id="userCodeBadge">Kode PMR: -</p>
+              <p class="badge-active" id="userBadgeTingkatan">Tingkatan: Mula</p>
+            </div>
+          </div>
+
+          <div class="level-points-box">
+            <div class="lp-card"><span id="userJabatanDisplay">Anggota</span><p>Jabatan</p></div>
+            <div class="lp-card"><span id="userTotalSkor">0</span><p>Total Poin Skor Keaktifan</p></div>
+          </div>
+
+          <div class="id-card-section">
+            <h4>🪪 Kartu Tanda Pengenal Anggota</h4>
+            <div id="pmrIdCard" class="pmr-id-card">
+              <div class="id-card-header">
+                <div class="id-card-brand"><span>SIAMO PMR</span></div>
+                <div class="id-card-unit" id="cardTingkatBadge">MULA</div>
+              </div>
+              <div class="id-card-body">
+                <img id="cardAvatar" src="" alt="Foto">
+                <div class="id-card-details">
+                  <h3 id="cardNama">Nama</h3>
+                  <p><strong>ID:</strong> <span id="cardKode">PMR-000</span></p>
+                  <p><strong>Jabatan:</strong> <span id="cardJabatan">Anggota</span></p>
+                  <p><strong>Sekolah:</strong> <span id="cardSekolah">SMPN 7 PTK</span></p>
+                </div>
+              </div>
+            </div>
+            <button onclick="downloadIdCard()" class="btn-primary" style="margin-top: 18px; width: 100%;">📥 Download Kartu (PNG)</button>
+          </div>
+
+          <div class="attendance-summary">
+            <h4>📊 Rekap Kehadiran & Poin</h4>
+            <div class="attendance-grid">
+              <div class="att-box green"><span id="attHadir">0</span><p>Hadir (+10)</p></div>
+              <div class="att-box yellow"><span id="attIzin">0</span><p>Izin</p></div>
+              <div class="att-box red"><span id="attAlpha">0</span><p>Alpha</p></div>
+            </div>
+          </div>
+
+          <div class="profile-box" id="userInfoDisplay"></div>
+        </div>
+      </div>
+
+      <!-- PAGE MEMBERS -->
+      <div id="pageMembers" class="page-section hidden">
+        <div class="card">
+          <h3>👥 Daftar Anggota Aktif PMR</h3>
+          <div class="members-grid" id="membersGridContainer"><p class="text-center">Memuat...</p></div>
+        </div>
+      </div>
+
+      <!-- PAGE RANK -->
+      <div id="pageRank" class="page-section hidden">
+        <div class="card">
+          <h2>🏆 Peringkat Anggota (Leaderboard)</h2>
+          <div class="tab-switcher" style="margin-bottom: 20px;">
+            <button id="btnRankQuiz" class="tab-btn active" onclick="switchRankTab('quiz')">Skor Kuis</button>
+            <button id="btnRankGame" class="tab-btn" onclick="switchRankTab('game')">Skor Game</button>
+            <button id="btnRankLatihan" class="tab-btn" onclick="switchRankTab('latihan')">Total Poin</button>
+          </div>
+          <div id="rankQuizContainer" class="rank-list-container"></div>
+          <div id="rankGameContainer" class="rank-list-container hidden"></div>
+          <div id="rankLatihanContainer" class="rank-list-container hidden"></div>
+        </div>
+      </div>
+
+      <!-- PAGE ACTIVITIES -->
+      <div id="pageActivities" class="page-section hidden">
+        <div class="card">
+          <h2>📅 Jadwal & Pendaftaran Kegiatan PMR</h2>
+          <div id="publicActivitiesContainer" class="activities-grid"><p class="text-center">Memuat kegiatan...</p></div>
+        </div>
+      </div>
+
+      <!-- PAGE BOOKS -->
+      <div id="pageBooks" class="page-section hidden">
+        <div class="card">
+          <h2>📚 Perpustakaan Buku & Modul PMR</h2>
+          <div id="publicBooksContainer" class="books-grid"><p class="text-center">Memuat perpustakaan...</p></div>
+        </div>
+      </div>
+
+      <!-- PAGE DOCS -->
+      <div id="pageDocs" class="page-section hidden">
+        <div class="card">
+          <h2>📷 Dokumentasi Kegiatan</h2>
+          <div class="tab-switcher" style="margin-bottom: 20px;">
+            <button id="btnDocLomba" class="tab-btn active" onclick="switchDocTab('lomba')">Lomba</button>
+            <button id="btnDocUmum" class="tab-btn" onclick="switchDocTab('umum')">Umum</button>
+          </div>
+          <div id="docLombaContainer" class="docs-grid"></div>
+          <div id="docUmumContainer" class="docs-grid hidden"></div>
+        </div>
+      </div>
+
+      <!-- PAGE QUIZ -->
+      <div id="pageQuiz" class="page-section hidden">
+        <div class="card text-center" style="padding: 60px 20px;">
+          <h2>🚀 Kuis PMR Interaktif</h2>
+          <a href="#" target="_blank" class="btn-primary" style="display:inline-block; text-decoration:none; margin-top:20px; padding: 10px 24px;">Buka Web Kuis ↗</a>
+        </div>
+      </div>
+
+      <!-- PAGE GAME -->
+      <div id="pageGame" class="page-section hidden">
+        <div class="card text-center" style="padding: 60px 20px;">
+          <h2>🎮 Mini Game: Pertolongan Pertama</h2>
+          <a href="#" target="_blank" class="btn-primary" style="display:inline-block; text-decoration:none; margin-top:20px; padding: 10px 24px;">Buka Web Game ↗</a>
+        </div>
+      </div>
+    </main>
+
+    <div id="imageZoomModal" class="zoom-modal hidden" onclick="closeZoomImage()">
+      <span class="zoom-close">&times;</span>
+      <img id="zoomedImg" src="" alt="Zoomed">
+    </div>
+
+    <footer class="app-footer">
+      <p>&copy; 2026 <strong>SIAMO PMR SMPN 7 Pontianak</strong>. All Rights Reserved.</p>
+    </footer>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/auth-session.js"></script>
+  <script src="js/auth-popup.js"></script>
+  <script src="js/public.js"></script>
+</body>
+</html>
