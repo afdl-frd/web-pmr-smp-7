@@ -65,6 +65,37 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {}
   }
 
+  // Toggle Menu Hamburger di HP
+  const btnHamburger = document.getElementById('btnHamburger');
+  const navMenuDrawer = document.getElementById('navMenuDrawer');
+
+  if (btnHamburger && navMenuDrawer) {
+    btnHamburger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = navMenuDrawer.classList.toggle('open');
+      btnHamburger.classList.toggle('open', isOpen);
+      btnHamburger.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    // Tutup menu otomatis setelah salah satu item diklik di HP
+    navMenuDrawer.querySelectorAll('.nav-link').forEach((item) => {
+      item.addEventListener('click', () => {
+        navMenuDrawer.classList.remove('open');
+        btnHamburger.classList.remove('open');
+        btnHamburger.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    // Tutup menu jika klik di luar area navbar
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#appNavbar')) {
+        navMenuDrawer.classList.remove('open');
+        btnHamburger.classList.remove('open');
+        btnHamburger.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
   // 2. Event Listener Form Masuk & Daftar
   function initAuthListeners() {
     const formMasuk = document.getElementById('modalFormMasuk');
