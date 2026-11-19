@@ -15,30 +15,39 @@
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
 body {
   background: var(--bg-gradient);
   color: var(--text-main);
   min-height: 100vh;
   position: relative;
-  overflow-x: hidden;
 }
 
 .background-blob {
-  position: absolute;
-  width: 400px;
-  height: 400px;
+  position: fixed;
+  width: 420px;
+  height: 420px;
   background: rgba(220, 38, 38, 0.08);
-  filter: blur(80px);
+  filter: blur(85px);
   border-radius: 50%;
-  top: -100px;
-  right: -100px;
+  top: -120px;
+  right: -120px;
   z-index: 0;
+  pointer-events: none;
 }
 
+/* KONTAINER UTAMA BENAR-BENAR DI TENGAH */
 .app-container {
+  width: 100%;
   max-width: 900px;
-  margin: 0 auto;
-  padding: 12px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 14px 16px 24px 16px;
   position: relative;
   z-index: 1;
   display: flex;
@@ -47,30 +56,39 @@ body {
 }
 
 .main-content {
+  width: 100%;
   flex: 1;
 }
 
-/* ==========================================
-   NAVBAR UTAMA YANG RAPI & RESPONSIF DI HP
-   ========================================== */
-.logo_pmi {
-  width: 100px;
+.page-section {
+  width: 100%;
 }
 
-   .navbar {
+/* ==========================================
+   NAVBAR + HAMBURGER MENU (HP & DESKTOP)
+   ========================================== */
+.navbar {
+  width: 100%;
   background: white;
   padding: 10px 16px;
   border-radius: 16px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
   border: 1px solid var(--border);
   position: sticky;
   top: 10px;
   z-index: 100;
-  gap: 12px;
+}
+
+.nav-top-bar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
 }
 
 .nav-brand {
@@ -90,55 +108,16 @@ body {
   flex-shrink: 0;
 }
 
-.nav-menu {
+.nav-right-group {
   display: flex;
   align-items: center;
-  gap: 4px;
-  background: #f8fafc;
-  padding: 4px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  overflow-x: auto;
-  max-width: 100%;
-  scrollbar-width: none;
-}
-
-.nav-menu::-webkit-scrollbar {
-  display: none;
-}
-
-.nav-link {
-  background: transparent;
-  border: none;
-  padding: 8px 10px;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
-
-.nav-link svg {
-  width: 18px;
-  height: 18px;
-  stroke: currentColor;
-}
-
-.nav-link:hover, 
-.nav-link.active {
-  background: white;
-  color: var(--primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  gap: 8px;
 }
 
 .nav-profile-menu {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-shrink: 0;
 }
 
 .notification-badge-wrapper {
@@ -161,7 +140,7 @@ body {
 }
 
 .nav-avatar-btn {
-  padding: 0;
+  padding: 0 !important;
   border-radius: 50%;
   background: none;
   border: none;
@@ -174,6 +153,7 @@ body {
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--primary);
+  display: block;
 }
 
 .btn-logout-nav {
@@ -186,34 +166,111 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
 }
 
 .btn-logout-nav:hover {
   background: #fecaca;
 }
 
+/* TOMBOL HAMBURGER (Tampil di HP, sembunyi di layar >= 768px) */
+.hamburger-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 38px;
+  height: 38px;
+  background: #f9fafb;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.hamburger-btn span {
+  display: block;
+  width: 18px;
+  height: 2.2px;
+  background: var(--text-main);
+  border-radius: 2px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.hamburger-btn.open span:nth-child(1) {
+  transform: translateY(6.2px) rotate(45deg);
+}
+.hamburger-btn.open span:nth-child(2) {
+  opacity: 0;
+}
+.hamburger-btn.open span:nth-child(3) {
+  transform: translateY(-6.2px) rotate(-45deg);
+}
+
+/* MENU NAVIGASI (Di HP tertutup sampai hamburger diklik) */
+.nav-menu {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  background: #f8fafc;
+  padding: 8px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.nav-menu.open {
+  display: flex;
+}
+
+.nav-link {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 10px 12px;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.nav-link svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background: white;
+  color: var(--primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
 /* ==========================================
    CARD CONTAINER & AUTH MODAL
    ========================================== */
 .card {
+  width: 100%;
   background: var(--card-bg);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--border);
   border-radius: 20px;
-  padding: 18px;
+  padding: 20px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-  animation: fadeIn 0.4s ease-out;
+  animation: fadeIn 0.3s ease-out;
   margin-bottom: 16px;
 }
 
-.auth-card {
-  max-width: 100%;
-  margin: 10px auto;
-}
-
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -231,7 +288,6 @@ body {
   justify-content: center;
   border-radius: 16px;
   margin: 0 auto 10px auto;
-  box-shadow: 0 6px 12px rgba(220, 38, 38, 0.1);
 }
 
 .auth-icon-svg {
@@ -251,18 +307,18 @@ body {
   margin-top: 4px;
 }
 
-/* TAB SWITCHER */
 .tab-switcher {
   display: flex;
   background: #f3f4f6;
   padding: 4px;
   border-radius: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
+  gap: 4px;
 }
 
 .tab-btn {
   flex: 1;
-  padding: 10px 6px;
+  padding: 10px 8px;
   border: none;
   background: transparent;
   font-weight: 600;
@@ -270,7 +326,7 @@ body {
   color: var(--text-muted);
   border-radius: 9px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.2s;
   text-align: center;
 }
 
@@ -280,7 +336,6 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-/* FORM ELEMENTS */
 .form-section {
   display: flex;
   flex-direction: column;
@@ -305,7 +360,7 @@ body {
   color: #374151;
 }
 
-.input-group input, 
+.input-group input,
 .input-group select {
   padding: 10px 14px;
   border: 1.5px solid var(--border);
@@ -316,7 +371,7 @@ body {
   width: 100%;
 }
 
-.input-group input:focus, 
+.input-group input:focus,
 .input-group select:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
@@ -326,14 +381,17 @@ body {
   background: var(--primary);
   color: white;
   border: none;
-  padding: 12px;
+  padding: 12px 16px;
   border-radius: 12px;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   width: 100%;
-  margin-top: 6px;
   box-shadow: 0 6px 15px rgba(220, 38, 38, 0.2);
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
 }
 
 .btn-secondary {
@@ -344,7 +402,7 @@ body {
   border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 15px;
+  margin-top: 12px;
   width: 100%;
 }
 
@@ -352,6 +410,7 @@ body {
    BERANDA & STATISTIK
    ========================================== */
 .hero-card {
+  width: 100%;
   background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
   color: white;
   padding: 24px;
@@ -368,8 +427,8 @@ body {
 
 .hero-card p {
   font-size: 14px;
-  opacity: 0.9;
-  line-height: 1.4;
+  opacity: 0.92;
+  line-height: 1.5;
 }
 
 .schedule-grid {
@@ -390,6 +449,7 @@ body {
 
 .schedule-icon {
   font-size: 24px;
+  flex-shrink: 0;
 }
 
 .schedule-box h4 {
@@ -417,7 +477,6 @@ body {
   border-radius: 16px;
   border: 1px solid var(--border);
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 }
 
 .stat-box h3 {
@@ -462,16 +521,6 @@ body {
   gap: 12px;
 }
 
-.contact-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid var(--primary);
-  background: #e5e7eb;
-  flex-shrink: 0;
-}
-
 .contact-info {
   flex: 1;
   min-width: 0;
@@ -481,15 +530,12 @@ body {
   font-size: 13px;
   font-weight: 700;
   color: var(--text-main);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .contact-info p {
   font-size: 11px;
   color: var(--text-muted);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .btn-wa {
@@ -498,7 +544,7 @@ body {
   color: white;
   font-size: 11px;
   font-weight: 700;
-  padding: 4px 8px;
+  padding: 5px 10px;
   border-radius: 6px;
   text-decoration: none;
 }
@@ -519,13 +565,13 @@ body {
 
 .avatar-container {
   position: relative;
-  width: 80px;
-  height: 80px;
+  width: 84px;
+  height: 84px;
 }
 
 .profile-avatar {
-  width: 80px;
-  height: 80px;
+  width: 84px;
+  height: 84px;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid var(--primary);
@@ -545,7 +591,6 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   font-size: 11px;
 }
 
@@ -614,12 +659,11 @@ body {
   font-size: 14px;
   font-weight: 700;
   margin-bottom: 12px;
-  color: var(--text-main);
 }
 
 .pmr-id-card {
   width: 100%;
-  max-width: 100%;
+  max-width: 420px;
   margin: 0 auto;
   background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
   color: #1f2937;
@@ -647,18 +691,6 @@ body {
   border-bottom: 2px solid #f3f4f6;
   padding-bottom: 8px;
   margin-bottom: 12px;
-}
-
-.id-card-brand {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.card-icon-svg {
-  width: 14px;
-  height: 14px;
-  stroke: var(--primary);
 }
 
 .id-card-brand span {
@@ -706,9 +738,6 @@ body {
   font-weight: 800;
   color: #111827;
   margin-bottom: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .id-card-details p {
@@ -716,63 +745,7 @@ body {
   color: #4b5563;
   display: flex;
   justify-content: space-between;
-}
-
-.id-card-details p strong {
-  color: #374151;
-  width: 65px;
-  flex-shrink: 0;
-}
-
-.id-card-footer {
-  margin-top: 12px;
-  padding-top: 8px;
-  border-top: 1px dashed #e5e7eb;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 9px;
-  color: #9ca3af;
-  font-weight: 600;
-}
-
-/* SKOR & ABSENSI */
-.score-summary-box {
-  margin-bottom: 20px;
-}
-
-.score-summary-box h4 {
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 10px;
-}
-
-.score-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.score-item {
-  background: #fff1f2;
-  border: 1px solid #fecaca;
-  padding: 14px;
-  border-radius: 14px;
-  text-align: center;
-  color: var(--primary);
-}
-
-.score-item span {
-  font-size: 20px;
-  font-weight: 800;
-  display: block;
-}
-
-.score-item p {
-  font-size: 11px;
-  font-weight: 600;
-  color: #4b5563;
-  margin-top: 2px;
+  gap: 6px;
 }
 
 .attendance-summary {
@@ -823,13 +796,20 @@ body {
 /* ==========================================
    DOKUMENTASI, LEADERBOARD, & ANGGOTA
    ========================================== */
-.docs-grid {
+.filter-pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 16px 0;
+}
+
+.docs-grid, .activities-grid, .books-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 14px;
 }
 
-.doc-card {
+.doc-card, .activity-card, .book-card {
   background: #f9fafb;
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -838,9 +818,14 @@ body {
   flex-direction: column;
 }
 
+.activity-card, .book-card {
+  padding: 14px;
+  gap: 6px;
+}
+
 .doc-img {
   width: 100%;
-  height: 140px;
+  height: 150px;
   object-fit: cover;
   background: #e5e7eb;
 }
@@ -861,16 +846,13 @@ body {
 .doc-body h4 {
   font-size: 14px;
   font-weight: 700;
-  color: var(--text-main);
 }
 
 .doc-body p {
   font-size: 12px;
   color: var(--text-muted);
-  line-height: 1.3;
 }
 
-/* LEADERBOARD (RANK) */
 .rank-item {
   display: flex;
   align-items: center;
@@ -914,34 +896,27 @@ body {
   flex: 1;
 }
 
-.rank-user-info h4 { 
-  font-size: 13px; 
-  font-weight: 700; 
-  white-space: nowrap; 
-  overflow: hidden; 
-  text-overflow: ellipsis; 
-}
-
-.rank-user-info p { 
-  font-size: 11px; 
-  color: var(--text-muted); 
-  white-space: nowrap; 
-  overflow: hidden; 
-  text-overflow: ellipsis; 
-}
-
-.rank-score { 
-  font-size: 14px; 
-  font-weight: 800; 
-  color: var(--primary); 
-  flex-shrink: 0; 
-}
-
-/* MEMBERS GRID */
-.subtitle-desc {
+.rank-user-info h4 {
   font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rank-user-info p {
+  font-size: 11px;
   color: var(--text-muted);
-  margin-bottom: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rank-score {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--primary);
+  flex-shrink: 0;
 }
 
 .members-grid {
@@ -971,37 +946,47 @@ body {
   background: #e5e7eb;
 }
 
-.member-card h4 { 
-  font-size: 13px; 
-  font-weight: 700; 
-  white-space: nowrap; 
-  overflow: hidden; 
-  text-overflow: ellipsis; 
-  width: 100%; 
-}
-
-.member-card p { 
-  font-size: 11px; 
-  color: var(--text-muted); 
-  white-space: nowrap; 
-  overflow: hidden; 
-  text-overflow: ellipsis; 
-  width: 100%; 
-}
-
-.coming-soon-badge {
-  display: inline-block;
-  background: #fee2e2;
-  color: var(--primary);
+.member-card h4 {
+  font-size: 13px;
   font-weight: 700;
-  padding: 5px 14px;
-  border-radius: 20px;
-  font-size: 12px;
-  margin-top: 8px;
+  width: 100%;
+  word-break: break-word;
 }
 
-/* FOOTER COPYRIGHT */
+.member-card p {
+  font-size: 11px;
+  color: var(--text-muted);
+  width: 100%;
+}
+
+.zoom-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 16px;
+}
+
+.zoom-modal img {
+  max-width: 100%;
+  max-height: 85vh;
+  border-radius: 12px;
+}
+
+.zoom-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  color: white;
+  font-size: 32px;
+  cursor: pointer;
+}
+
 .app-footer {
+  width: 100%;
   text-align: center;
   padding: 16px 0;
   margin-top: 20px;
@@ -1014,16 +999,76 @@ body {
 .text-center { text-align: center !important; }
 
 /* ==========================================
-   MEDIA QUERY UNTUK TABLET / DESKTOP
+   DESKTOP / TABLET (>= 768px)
    ========================================== */
-@media (min-width: 640px) {
-  .app-container { padding: 20px; }
-  .input-row, .stats-grid, .score-grid, .level-points-box { grid-template-columns: 1fr 1fr; }
-  .schedule-grid, .contact-grid { grid-template-columns: 1fr 1fr; }
-  .attendance-grid { grid-template-columns: repeat(3, 1fr); }
-  .docs-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
-  .members-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
-  .profile-header-box { flex-direction: row; text-align: left; }
-  .avatar-container { width: 90px; height: 90px; }
-  .profile-avatar { width: 90px; height: 90px; }
+@media (min-width: 768px) {
+  .app-container {
+    padding: 20px 24px 32px 24px;
+  }
+
+  /* Di desktop sembunyikan hamburger, tampilkan menu bar horizontal */
+  .hamburger-btn {
+    display: none;
+  }
+
+  .navbar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+  }
+
+  .nav-top-bar {
+    width: auto;
+    flex: 1;
+  }
+
+  .nav-menu {
+    display: flex !important;
+    flex-direction: row;
+    width: auto;
+    background: #f8fafc;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .nav-link {
+    width: auto;
+    padding: 8px 10px;
+    justify-content: center;
+  }
+
+  .nav-label {
+    display: none;
+  }
+
+  .card {
+    padding: 28px;
+  }
+
+  .input-row,
+  .stats-grid,
+  .level-points-box {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .schedule-grid,
+  .contact-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .docs-grid,
+  .activities-grid,
+  .books-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  .members-grid {
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  }
+
+  .profile-header-box {
+    flex-direction: row;
+    text-align: left;
+  }
 }
